@@ -94,13 +94,16 @@ class SnackbarController {
   void _configureOverlay() {
     _isTesting = Get.overlayContext == null;
     _overlayState = _isTesting ? OverlayState() : Get.key.currentState?.overlay;
+
+    // 🚩 FIX: Call _configureSnackBarDisplay() before creating overlay entries
+    // to initialize all 'late' fields like _animation.
+    _configureSnackBarDisplay();
+
     _overlayEntries.clear();
     _overlayEntries.addAll(_createOverlayEntries(_getBodyWidget()));
     if (!_isTesting) {
       _overlayState!.insertAll(_overlayEntries);
     }
-
-    _configureSnackBarDisplay();
   }
 
   void _configureSnackBarDisplay() {
@@ -111,7 +114,7 @@ class SnackbarController {
     _snackbarStatus = snackbar.snackbarStatus;
     _filterBlurAnimation = _createBlurFilterAnimation();
     _filterColorAnimation = _createColorOverlayColor();
-    _animation = _createAnimation();
+    _animation = _createAnimation(); // This is where _animation is initialized
     _animation.addStatusListener(_handleStatusChanged);
     _configureTimer();
     _controller.forward();
@@ -358,6 +361,7 @@ class SnackbarController {
   }
 }
 
+// ... (SnackBarQueue class remains unchanged)
 class SnackBarQueue {
   final _queue = GetQueue();
   final _snackbarList = <SnackbarController>[];
